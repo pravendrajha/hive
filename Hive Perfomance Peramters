@@ -1,0 +1,86 @@
+set mapreduce.map.memory.mb=5120;
+set mapreduce.map.java.opts=-Xmx4g # Should be 80% of (mapreduce.map.memory.mb)
+set mapreduce.reduce.memory.mb=5120;
+set mapreduce.reduce.java.opts==-Xmx4g ; #
+
+
+
+//set CBO enabled
+
+SET hive.stats.fetch.column.stats=true;
+SET hive.stats.fetch.partition.stats=true;
+SET hive.cbo.enable=true;
+SET hive.stats.autogather=true;
+
+
+CREATE INDEX table1_idx_1 ON TABLE table1 (col2) AS BITMAP;
+ANALYZE TABLE table1 COMPUTE STATISTICS for COLUMNS col2;
+
+SELECT col1 FROM table1 WHERE col2=123456;
+
+
+
+//Slow join performance 
+
+1:- Use Orc
+2:- use Vectorization 
+3:- Use parttioning\Bucketing 
+4
+
+
+// Common Practice 
+
+Use Tez :-  hive.execution.engine=tez;
+
+Use Vectorization ;-  set hive.vectorized.execution.enabled=true
+set hive.vectorized.execution.reduce.enabled=true
+
+
+use Orc :- create table Orc_hive( emp int , address String ) stored as orc tblproperties("compress.mode"="SNAPPY") --Orc support  Zlib/Snappy
+
+
+Enable Dynamic Hive Partition =>  hive.exec.dynamic.parttion = true 
+hive.exec.dynamic.partition.mode=nonstric
+
+ CBO Enablement :- 
+ 
+ hive.cbo.enable=true
+ hive.compute.query.stats=true
+ hive.stats.fetch.partition.stats=true
+ hive.stats.fetch.column.stats=true
+ 
+ Map Join :- 
+ 
+ hive.auto.convert.join =true
+ 
+ Bucketing :- 
+ 
+ hive.enforce.bucketing=true
+ hive.optimize.bucketmapjoin=true 
+ 
+ 
+ #Parallel Execution 
+  hive,exec.parallel=true
+ 
+ # Compress Map\Reduce OutPut 
+ mapred.compress.map.output =true
+ maprd.output.compress =true 
+ 
+ 
+ 
+ 
+ #Text Format Files :- 
+ org.apache.hadoop.mapred.TextInputFormat
+org.apache.hadoop.mapred.TextOutputFormat
+ 
+ 
+#Sequence File 
+org.apache.hadoop.mapred.SequenceFileInputFormat
+org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
+
+#Orc FIle 
+org.apache.hadoop.hive.ql.io.RCFileInputFormat
+org.apache.hadoop.hive.ql.io.RCFileOutputFormat
+
+
+--
